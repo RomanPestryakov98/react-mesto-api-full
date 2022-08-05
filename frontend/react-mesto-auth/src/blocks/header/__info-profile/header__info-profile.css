@@ -1,0 +1,26 @@
+.header__info-profile {
+	display: flex;
+	gap: 24px;
+}
+
+@media screen and (max-width: 745px) {
+	.header__info-profile {
+		position: fixed;
+		width: 100%;
+		top: -142px;
+		left: 0;
+		flex-direction: column;
+		align-items: center;
+		gap: 18px;
+		height: 142px;
+		justify-content: center;
+		transition: top 0.3s ease 0s;
+	}
+
+	.menu-open .header__info-profile {
+		display: flex;
+		top: 0;
+		background-color: black;
+		z-index: 10;
+	}
+}

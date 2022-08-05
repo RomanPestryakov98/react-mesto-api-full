@@ -1,0 +1,8 @@
+.element__like_disabled {
+  background-image: url("../../../../images/elements/like/like.svg");
+  background-repeat: no-repeat;
+}
+
+.element__like_disabled:hover {
+  opacity: 0.5;
+}

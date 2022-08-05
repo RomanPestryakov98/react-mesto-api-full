@@ -1,0 +1,10 @@
+.popup_type_auth {
+	position: relative;
+	visibility: visible;
+	opacity: 1;
+	align-items: flex-start;
+	flex: 1 1 auto;
+	display: block;
+	max-width: 358px;
+	margin: 60px auto 0;
+}

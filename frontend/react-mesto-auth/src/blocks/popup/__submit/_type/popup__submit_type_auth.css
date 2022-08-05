@@ -1,0 +1,10 @@
+.popup__submit_type_auth {
+	background-color: white;
+	color: black;
+	margin-top: 216px;
+}
+
+.popup__submit_type_auth:hover {
+	background-color: white;
+	color: black;
+}

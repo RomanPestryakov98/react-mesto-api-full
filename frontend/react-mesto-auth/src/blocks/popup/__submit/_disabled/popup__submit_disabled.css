@@ -1,0 +1,7 @@
+.popup__submit_disabled {
+  opacity: 0.2;
+  color: black;
+  border: 1px solid #000;
+  background-color: transparent;
+  pointer-events: none;
+}
