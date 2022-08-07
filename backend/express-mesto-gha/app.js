@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { errors, celebrate, Joi } = require('celebrate');
+const cors = require('cors');
 const auth = require('./middlewares/auth');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const allowedCors = require('./cors/allowedCors');
@@ -18,6 +19,7 @@ app.use((req, res, next) => {
   res.header({ 'Access-Control-Allow-Origin': '*' });
   next();
 });
+app.use(cors());
 
 mongoose.connect('mongodb://127.0.0.1/mestodb', {
   useNewUrlParser: true,
