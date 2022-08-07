@@ -12,6 +12,7 @@ const { PORT = 3000 } = process.env;
 const app = express();
 
 app.use((req, res, next) => {
+  console.log(allowedCors)
   const { method } = req;
   const requestHeaders = req.headers['access-control-request-headers'];
   const { origin } = req.headers;
@@ -22,7 +23,7 @@ app.use((req, res, next) => {
   }
 
   if (allowedCors.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Origin', '*');
   }
 
   next();
