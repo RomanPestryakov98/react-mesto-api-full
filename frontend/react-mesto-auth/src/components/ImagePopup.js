@@ -11,7 +11,7 @@ function ImagePopup(props) {
 				<div className="popup__container-image">
 					<img src={props.card ? props.card.link : '/'} alt={props.card && props.card.name} className="popup__image" />
 				</div>
-				<p className="popup__label-text"></p>
+				<p className="popup__label-text">{props.card && props.card.name}</p>
 			</div>
 		</div>
 	)

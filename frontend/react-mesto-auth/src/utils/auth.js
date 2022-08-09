@@ -1,5 +1,12 @@
 export const BASE_URL = 'https://api.mesto.nomoredomains.sbs';
 
+function checkResponse(res) {
+	if (res.ok) {
+		return res.json()
+	}
+	return Promise.reject(`Ошибка: ${res.status}`)
+}
+
 export const register = (password, email) => {
 	return fetch(`${BASE_URL}/signup`, {
 		method: 'POST',
@@ -8,15 +15,7 @@ export const register = (password, email) => {
 		},
 		body: JSON.stringify({ password, email })
 	})
-		.then((response) => {
-			if (response.ok) {
-				return response.json()
-			}
-			else {
-				throw Error
-			}
-		})
-		.then(res => res)
+		.then(checkResponse)
 };
 
 
@@ -28,18 +27,11 @@ export const authorize = (password, email) => {
 		},
 		body: JSON.stringify({ password, email })
 	})
-		.then(response => {
-			if (response.ok) {
-				return response.json()
-			}
-			else {
-				throw Error
-			}
-		})
+		.then(checkResponse)
 };
 
 
-export const validation = (token) => {
+export const validateToken = (token) => {
 	return fetch(`${BASE_URL}/users/me`, {
 		method: 'GET',
 		headers: {
@@ -47,5 +39,5 @@ export const validation = (token) => {
 			"Authorization": `Bearer ${token}`
 		}
 	})
-		.then((response => response.json()))
+		.then(checkResponse)
 }; 

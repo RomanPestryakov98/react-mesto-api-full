@@ -8,11 +8,7 @@ function Header(props) {
 	function onSignOut() {
 		localStorage.removeItem('token');
 		history.push('/sign-in');
-		document.documentElement.classList.remove('menu-open')
-	}
-
-	function clickBurger(e) {
-		document.documentElement.classList.toggle('menu-open')
+		props.onCloseBurger();
 	}
 
 	return (
@@ -26,7 +22,7 @@ function Header(props) {
 					<Link className='header__inner header__inner_type_exit' to="/sign-in" onClick={onSignOut}>Выйти</Link>
 				</div>
 			}
-			{window.location.pathname === '/' && <button type="button" className="header__burger" onClick={clickBurger}><span></span></button>}
+			{window.location.pathname === '/' && <button type="button" className="header__burger" onClick={props.onClickBurger}><span></span></button>}
 		</header>
 	)
 }

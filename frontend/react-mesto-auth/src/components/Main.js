@@ -12,7 +12,7 @@ function Main(props) {
 		<main className="content">
 			<section className="profile">
 				<div className="profile__avatar" onClick={props.onEditAvatar}>
-					<img src={currentUser.avatar} alt='Аватар' className="profile__avatar-image" style={{ backgroundImage: `url(${currentUser.avatar})` }} />
+					<img src={currentUser.avatar} alt='Аватар' className="profile__avatar-image" />
 					<div className="profile__hover">
 						<div className="profile__overlay"></div>
 						<img src={redaction} alt="Редактировать"

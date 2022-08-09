@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Route, Switch, useHistory } from 'react-router-dom';
 import Header from './Header';
+import Footer from './Footer';
 import Main from './Main';
 import ImagePopup from './ImagePopup';
 import api from '../utils/Api.js';
 import CurrentUserContext from '../contexts/CurrentUserContext';
-import EmailContext from '../contexts/EmailContext';
 import EditProfilePopup from './EditProfilePopup';
 import EditAvatarPopup from './EditAvatarPopup';
 import AddPlacePopup from './AddPlacePopup';
@@ -14,7 +14,7 @@ import InfoTooltip from './InfoTooltip';
 import Login from './Login';
 import Register from './Register';
 import ProtectedRoute from './ProtectedRoute';
-import * as auth from '../auth.js';
+import * as auth from '../utils/auth.js';
 
 function App() {
 	const [currentUser, setCurrentUser] = useState({});
@@ -30,7 +30,24 @@ function App() {
 	const [loggedIn, setLoggedIn] = useState(false);
 	const [email, setEmail] = useState('');
 	const [successfully, setSuccessfully] = useState(false);
+	const [isBurgerOpen, setIsBurgerOpen] = useState(false);
 	const history = useHistory();
+
+	const isOpen = isEditAvatarPopupOpen || isEditProfilePopupOpen || isAddPlacePopupOpen || selectedCard || isRegistrationPopupOpen;
+
+	useEffect(() => {
+		function closeByEscape(evt) {
+			if (evt.key === 'Escape') {
+				closeAllPopups();
+			}
+		}
+		if (isOpen) {
+			document.addEventListener('keydown', closeByEscape);
+			return () => {
+				document.removeEventListener('keydown', closeByEscape);
+			}
+		}
+	}, [isOpen])
 
 	useEffect(() => {
 		api.getDataCards()
@@ -54,19 +71,15 @@ function App() {
 
 	useEffect(() => {
 		tokenCheck()
-	})
-
-	function handleSuccessfully(isOk) {
-		setSuccessfully(isOk)
-	}
+	}, [])
 
 	function tokenCheck() {
 		const token = localStorage.getItem('token');
 		if (token) {
-			auth.validation(token)
+			auth.validateToken(token)
 				.then(data => {
 					if (data) {
-						loggedInInner();
+						setLoggedIn(true)
 						history.push('/');
 						setEmail(data.data.email);
 					}
@@ -90,10 +103,7 @@ function App() {
 	function handleCardDelete(card) {
 		api.deleteCard(card._id)
 			.then(() => {
-				const newCards = cards.filter(function (item) {
-					return item._id !== card._id;
-				})
-				setCards(newCards);
+				setCards((state) => state.filter((c) => c._id !== card._id));
 				closeAllPopups();
 			})
 			.catch(err => {
@@ -116,10 +126,6 @@ function App() {
 	function handleDeleteCardClick(card) {
 		setCard(card);
 		setIsDeleteCardPopupOpen(true);
-	}
-
-	function handleRegistrationClick() {
-		setIsRegistrationPopupOpen(true);
 	}
 
 	function handleUpdateUser(data) {
@@ -180,69 +186,107 @@ function App() {
 		setSelectedCard(obj);
 	}
 
-	function loggedInInner() {
-		setLoggedIn(true)
+	function clickBurger() {
+		setIsBurgerOpen(!isBurgerOpen);
+	}
+
+	function closeBurger() {
+		setIsBurgerOpen(false);
+	}
+
+	function authorization(password, email) {
+		auth.authorize(password, email)
+			.then(data => {
+				localStorage.setItem('token', data.token);
+				setEmail(email)
+				setLoggedIn(true);
+				history.push('/')
+			})
+			.catch(() => {
+				setSuccessfully(false)
+				setIsRegistrationPopupOpen(true)
+			})
+	}
+
+	function registration(password, email) {
+		auth.register(password, email)
+			.then(res => {
+				if (res) {
+					history.push('/sign-in')
+					setSuccessfully(true)
+				}
+			})
+			.catch(() => {
+				setSuccessfully(false)
+			})
+			.finally(() => {
+				setIsRegistrationPopupOpen(true)
+			})
 	}
 
 	return (
 		<CurrentUserContext.Provider value={currentUser}>
-			<EmailContext.Provider value={email}>
-				<div className="page">
-					<Switch>
-						<Route path="/sign-up">
-							<Header />
-							<Register onRegistration={handleRegistrationClick} onSuccessfully={handleSuccessfully} />
-						</Route>
-						<Route path="/sign-in">
-							<Header />
-							<Login onRegistration={handleRegistrationClick} onSuccessfully={handleSuccessfully} onLoggedIn={loggedInInner} />
-						</Route>
-						<ProtectedRoute
-							exact path='/'
-							loggedIn={loggedIn}
-							onEditProfile={handleEditProfileClick}
-							onAddPlace={handleAddPlaceClick}
-							onEditAvatar={handleEditAvatarClick}
-							onEditDeleteCard={handleDeleteCardClick}
-							onCardClick={handleCardClick}
-							cards={cards}
-							onCardLike={handleCardLike}
-							component={Main}
-						/>
-					</Switch>
-					<EditProfilePopup
-						isOpen={isEditProfilePopupOpen}
-						onClose={closeAllPopups}
-						onUpdateUser={handleUpdateUser}
-						isLoading={isLoading}
+			<div className={`page ${isBurgerOpen ? "menu-open" : ""}`}>
+				<Route exact path="/">
+					<Header email={email} onClickBurger={clickBurger} onCloseBurger={closeBurger} />
+				</Route>
+				<Switch>
+					<Route path="/sign-up">
+						<Header />
+						<Register onRegistration={registration} />
+					</Route>
+					<Route path="/sign-in">
+						<Header />
+						<Login onAuthorization={authorization} />
+					</Route>
+					<ProtectedRoute
+						exact path='/'
+						loggedIn={loggedIn}
+						onEditProfile={handleEditProfileClick}
+						onAddPlace={handleAddPlaceClick}
+						onEditAvatar={handleEditAvatarClick}
+						onEditDeleteCard={handleDeleteCardClick}
+						onCardClick={handleCardClick}
+						cards={cards}
+						onCardLike={handleCardLike}
+						component={Main}
 					/>
-					<EditAvatarPopup
-						isOpen={isEditAvatarPopupOpen}
-						onClose={closeAllPopups}
-						onUpdateAvatar={handleUpdateAvatar}
-						isLoading={isLoading}
-					/>
-					<AddPlacePopup
-						isOpen={isAddPlacePopupOpen}
-						onClose={closeAllPopups}
-						onAddCard={handleAddCard}
-						isLoading={isLoading}
-					/>
-					<DeleteCardPopup
-						isOpen={isDeleteCardPopupOpen}
-						onClose={closeAllPopups}
-						onDeleteCard={handleCardDelete}
-						card={card}
-						isLoading={isLoading}
-					/>
-					<InfoTooltip
-						isOpen={isRegistrationPopupOpen}
-						onClose={closeAllPopups}
-						isSuccessfully={successfully}
-					/>
-					<ImagePopup card={selectedCard} onClose={closeAllPopups} />
-				</div>
-			</EmailContext.Provider>
+				</Switch>
+				<Route exact path="/">
+					<Footer />
+				</Route>
+				<EditProfilePopup
+					isOpen={isEditProfilePopupOpen}
+					onClose={closeAllPopups}
+					onUpdateUser={handleUpdateUser}
+					isLoading={isLoading}
+				/>
+				<EditAvatarPopup
+					isOpen={isEditAvatarPopupOpen}
+					onClose={closeAllPopups}
+					onUpdateAvatar={handleUpdateAvatar}
+					isLoading={isLoading}
+				/>
+				<AddPlacePopup
+					isOpen={isAddPlacePopupOpen}
+					onClose={closeAllPopups}
+					onAddCard={handleAddCard}
+					isLoading={isLoading}
+				/>
+				<DeleteCardPopup
+					isOpen={isDeleteCardPopupOpen}
+					onClose={closeAllPopups}
+					onDeleteCard={handleCardDelete}
+					card={card}
+					isLoading={isLoading}
+				/>
+				<InfoTooltip
+					isOpen={isRegistrationPopupOpen}
+					onClose={closeAllPopups}
+					isSuccessfully={successfully}
+				/>
+				<ImagePopup card={selectedCard} onClose={closeAllPopups} />
+			</div>
 		</CurrentUserContext.Provider>
 	);
 }

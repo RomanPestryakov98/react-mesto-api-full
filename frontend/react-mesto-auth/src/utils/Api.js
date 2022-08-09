@@ -84,6 +84,7 @@ class Api {
 const api = new Api({
 	baseUrl: 'https://api.mesto.nomoredomains.sbs',
 	headers: {
+		authorization: '42addcd3-4dcf-4727-a945-f301b68d55fb',
 		'Content-Type': 'application/json'
 	}
 })

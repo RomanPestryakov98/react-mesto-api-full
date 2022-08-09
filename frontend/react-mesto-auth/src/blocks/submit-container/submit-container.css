@@ -1,0 +1,6 @@
+.submit-container {
+	flex: 1 1 auto;
+    justify-content: end;
+    display: flex;
+    flex-direction: column;
+}
