@@ -7,6 +7,7 @@ function Header(props) {
 	const history = useHistory();
 	function onSignOut() {
 		localStorage.removeItem('token');
+		props.onSetLoggedIn(false);
 		history.push('/sign-in');
 		props.onCloseBurger();
 	}

@@ -50,28 +50,32 @@ function App() {
 	}, [isOpen])
 
 	useEffect(() => {
-		api.getDataCards()
-			.then(data => {
-				setCards([...cards, ...data])
-			})
-			.catch(err => {
-				console.log(err)
-			})
-	}, [])
+		if (loggedIn) {
+			api.getDataCards(localStorage.getItem('token'))
+				.then(data => {
+					setCards(data)
+				})
+				.catch(err => {
+					console.log(err)
+				})
+		}
+	}, [loggedIn])
 
 	useEffect(() => {
-		api.getDataProfile()
-			.then(data => {
-				setCurrentUser(data)
-			})
-			.catch(err => {
-				console.log(err)
-			})
-	}, [])
+		if (loggedIn) {
+			api.getDataProfile(localStorage.getItem('token'))
+				.then(data => {
+					setCurrentUser(data)
+				})
+				.catch(err => {
+					console.log(err)
+				})
+		}
+	}, [loggedIn])
 
 	useEffect(() => {
 		tokenCheck()
-	}, [])
+	}, [loggedIn])
 
 	function tokenCheck() {
 		const token = localStorage.getItem('token');
@@ -81,7 +85,7 @@ function App() {
 					if (data) {
 						setLoggedIn(true)
 						history.push('/');
-						setEmail(data.data.email);
+						setEmail(data.email);
 					}
 				})
 				.catch(err => {
@@ -91,8 +95,8 @@ function App() {
 	}
 
 	function handleCardLike(card) {
-		const isLiked = card.likes.some(i => i._id === currentUser._id);
-		api.toggleLike(card._id, isLiked).then((newCard) => {
+		const isLiked = card.likes.some(i => i === currentUser._id);
+		api.toggleLike(card._id, isLiked, localStorage.getItem('token')).then((newCard) => {
 			setCards((cards) => cards.map((c) => c._id === card._id ? newCard : c));
 		})
 			.catch(err => {
@@ -101,7 +105,7 @@ function App() {
 	}
 
 	function handleCardDelete(card) {
-		api.deleteCard(card._id)
+		api.deleteCard(card._id, localStorage.getItem('token'))
 			.then(() => {
 				setCards((state) => state.filter((c) => c._id !== card._id));
 				closeAllPopups();
@@ -130,7 +134,7 @@ function App() {
 
 	function handleUpdateUser(data) {
 		setIsLoading(true);
-		api.updateDataProfile(data)
+		api.updateDataProfile(data, localStorage.getItem('token'))
 			.then(data => {
 				setCurrentUser(data);
 				closeAllPopups();
@@ -145,7 +149,7 @@ function App() {
 
 	function handleUpdateAvatar(data) {
 		setIsLoading(true);
-		api.updateAvatar(data)
+		api.updateAvatar(data, localStorage.getItem('token'))
 			.then(data => {
 				setCurrentUser(data);
 				closeAllPopups();
@@ -160,7 +164,7 @@ function App() {
 
 	function handleAddCard(data) {
 		setIsLoading(true);
-		api.addNewCard(data)
+		api.addNewCard(data, localStorage.getItem('token'))
 			.then(data => {
 				setCards([data, ...cards]);
 				closeAllPopups();
@@ -228,7 +232,7 @@ function App() {
 		<CurrentUserContext.Provider value={currentUser}>
 			<div className={`page ${isBurgerOpen ? "menu-open" : ""}`}>
 				<Route exact path="/">
-					<Header email={email} onClickBurger={clickBurger} onCloseBurger={closeBurger} />
+					<Header email={email} onClickBurger={clickBurger} onCloseBurger={closeBurger} onSetLoggedIn={setLoggedIn} />
 				</Route>
 				<Switch>
 					<Route path="/sign-up">
