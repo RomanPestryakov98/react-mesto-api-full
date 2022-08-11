@@ -7,9 +7,6 @@ const Forbidden = require('../errors/Forbidden');
 module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => {
-      if (!cards) {
-        throw new InternalServerError();
-      }
       res.send(cards);
     })
     .catch(next);
